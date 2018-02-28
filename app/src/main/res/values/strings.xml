@@ -2,5 +2,10 @@
     <string name="app_name">ErrorHandling</string>
     <string name="personal_details">Personal Details</string>
     <string name="home_message">Welcome %1$s, Your last login was at %2%s attempted from %3$s.</string>
-    <string name="please_wait">Please wait...</string>
+    <string name="please_wait">Please wait &#8230;</string>
+    <string name="enter_username">Enter username</string>
+    <string name="enter_password">Enter password</string>
+    <string name="login">Login</string>
+    <string name="please_enter_username">Please enter username</string>
+    <string name="please_enter_password">Please enter password</string>
 </resources>

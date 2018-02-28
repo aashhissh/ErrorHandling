@@ -55,7 +55,6 @@ public class LastLoginInteractorImpl extends AbstractInteractor implements LastL
             // initializing the REST service we will use
             ErrorHandlingRestService errorHandlingRestService = RestClient.getService(ErrorHandlingRestService.class);
 
-
             // initializing payload object for get user details
             GetLastLoginDetailsPayload getLastLoginDetailsPayload = new GetLastLoginDetailsPayload();
 
@@ -65,16 +64,21 @@ public class LastLoginInteractorImpl extends AbstractInteractor implements LastL
                     .enqueue(new retrofit2.Callback<GetLastLoginDetailsResponse>() {
                         @Override
                         public void onResponse(Call<GetLastLoginDetailsResponse> call, Response<GetLastLoginDetailsResponse> response) {
-                            GetLastLoginDetailsResponse getLastLoginDetailsResponse = response.body();
+                            final GetLastLoginDetailsResponse getLastLoginDetailsResponse = response.body();
 
                             if(response.isSuccessful() && getLastLoginDetailsResponse != null &&
                                     getLastLoginDetailsResponse.getStatus() == 1) {
                                 userRepository.saveUserId(getLastLoginDetailsResponse.getUserId());
-                                callback.onLastLoginDataReceived(
-                                        GetLastLoginDetailsConverter.convertGetLastLoginDetailsResponseToLastLoginDetailsModel(
-                                                getLastLoginDetailsResponse
-                                        )
-                                );
+                                mMainThread.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        callback.onLastLoginDataReceived(
+                                                GetLastLoginDetailsConverter.convertGetLastLoginDetailsResponseToLastLoginDetailsModel(
+                                                        getLastLoginDetailsResponse
+                                                )
+                                        );
+                                    }
+                                });
                             } else {
                                 String message = getLastLoginDetailsResponse != null &&
                                         getLastLoginDetailsResponse.getMsg() != null ?

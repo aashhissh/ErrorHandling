@@ -34,6 +34,7 @@ public class HomePresenterImpl extends AbstractPresenter implements HomePresente
     }
 
     private void getWelComeData() {
+        view.showProgress();
         LastLoginInteractor lastLoginInteractor = new LastLoginInteractorImpl(
                 mExecutor,
                 mMainThread,
