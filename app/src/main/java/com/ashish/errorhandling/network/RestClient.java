@@ -17,7 +17,10 @@ public class RestClient {
     private static Retrofit s_retrofit;
 
     private RestClient() {
+        CustomResponseInterceptor interceptor = new CustomResponseInterceptor();
+
         OkHttpClient client = new OkHttpClient.Builder()
+                .addInterceptor(interceptor)
                 .build();
 
         s_retrofit = new Retrofit.Builder()

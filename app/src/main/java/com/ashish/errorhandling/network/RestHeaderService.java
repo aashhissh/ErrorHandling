@@ -9,12 +9,16 @@ import java.util.Map;
  */
 public class RestHeaderService {
 
-    private static final String KEY_HEADER = "Bearer: ";
+    public static final String KEY_HEADER = "Authorization";
 
     public static Map<String, String> getRequestHeader(String token) {
         Map<String, String> header = new HashMap<>();
-        header.put(KEY_HEADER, token);
+        header.put(KEY_HEADER, " Token " + token);
         return header;
+    }
+
+    public static String getTokenValue(String token) {
+        return (" Token " + token);
     }
 
 }
