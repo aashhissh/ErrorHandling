@@ -8,4 +8,10 @@
     <string name="login">Login</string>
     <string name="please_enter_username">Please enter username</string>
     <string name="please_enter_password">Please enter password</string>
+    <string name="age_text">Age: %1$d</string>
+    <string name="gender_text">Gender: %1$s</string>
+    <string name="address_text">Address: %1$s</string>
+    <string name="bloodgroup_text">Bloodgroup: %1$s</string>
+    <string name="height_text">Height: %1$d</string>
+    <string name="weight_text">Weight: %1$f</string>
 </resources>
