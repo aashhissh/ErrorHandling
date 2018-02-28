@@ -5,7 +5,6 @@ import com.ashish.errorhandling.domain.executor.Executor;
 import com.ashish.errorhandling.domain.executor.MainThread;
 
 /**
- * Created by dmilicic on 8/4/15.
  * <p/>
  * This abstract class implements some common methods for all interactors. Cancelling an interactor, check if its running
  * and finishing an interactor has mostly the same code throughout so that is why this class was created. Field methods
