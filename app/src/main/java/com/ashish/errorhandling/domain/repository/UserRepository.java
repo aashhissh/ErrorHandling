@@ -8,4 +8,10 @@ public interface UserRepository {
 
     String getAuthToken();
 
+    void saveAuthToken(String token);
+
+    String getUserId();
+
+    void saveUserId(String userId);
+
 }

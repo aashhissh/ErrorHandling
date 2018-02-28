@@ -60,6 +60,7 @@ public class HomePresenterImpl extends AbstractPresenter implements HomePresente
 
     @Override
     public void onLastLoginDataReceived(LastLoginDetailsModel lastLoginDetailsModel) {
+        view.hideProgress();
         WelcomeModel welcomeModel = LastLoginToWelcomeConverter.convertLastLoginModelToWelcomeModel(
                 lastLoginDetailsModel
         );
@@ -71,16 +72,19 @@ public class HomePresenterImpl extends AbstractPresenter implements HomePresente
 
     @Override
     public void onError(String message) {
+        view.hideProgress();
         view.showError(message);
     }
 
     @Override
     public void onTokenRevoked() {
+        view.hideProgress();
         view.onTokenRevoked();
     }
 
     @Override
     public void onNoUserDataFound() {
+        view.hideProgress();
         view.onTokenRevoked();
     }
 }

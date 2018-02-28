@@ -2,6 +2,7 @@ package com.ashish.errorhandling;
 
 import android.app.Application;
 
+import com.ashish.errorhandling.network.RestClient;
 import com.ashish.errorhandling.utils.PrefUtil;
 
 public class ErrorApplication extends Application {
@@ -10,5 +11,6 @@ public class ErrorApplication extends Application {
         super.onCreate();
 
         PrefUtil.init(this);
+        RestClient.init();
     }
 }

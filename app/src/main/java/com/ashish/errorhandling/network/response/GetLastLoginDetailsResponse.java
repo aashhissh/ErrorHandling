@@ -1,22 +1,21 @@
-package com.ashish.errorhandling.domain.model;
+package com.ashish.errorhandling.network.response;
+
+import com.google.gson.annotations.SerializedName;
 
 /**
  * @author ashish
  * @since 28/02/18
  */
-public class LastLoginDetailsModel {
+public class GetLastLoginDetailsResponse extends ResponseBaseModel {
 
+    @SerializedName("userId")
     private String userId;
+    @SerializedName("userName")
     private String userName;
+    @SerializedName("lastLoginDate")
     private String lastLoginDate;
+    @SerializedName("device")
     private String device;
-
-    public LastLoginDetailsModel(String userId, String userName, String lastLoginDate, String device) {
-        this.userId = userId;
-        this.userName = userName;
-        this.lastLoginDate = lastLoginDate;
-        this.device = device;
-    }
 
     public String getUserId() {
         return userId;
@@ -33,5 +32,4 @@ public class LastLoginDetailsModel {
     public String getDevice() {
         return device;
     }
-
 }

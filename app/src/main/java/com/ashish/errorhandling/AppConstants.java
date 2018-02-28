@@ -6,4 +6,5 @@ package com.ashish.errorhandling;
  */
 public class AppConstants {
     public static final String PREFERENCES = "error_handling_pref";
+    public static final String BASE_URL = "https://testapp.example.com/";
 }
