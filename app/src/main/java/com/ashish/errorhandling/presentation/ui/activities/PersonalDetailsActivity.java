@@ -50,6 +50,9 @@ public class PersonalDetailsActivity extends AppCompatActivity implements Person
 
     @Override
     public void updatePersonalInformation(PersonalDetailsModel personalDetailsModel) {
+        if(getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(personalDetailsModel.getUserName());
+        }
         tvAge.setText(getString(R.string.age_text, personalDetailsModel.getAge()));
         tvGender.setText(getString(R.string.gender_text, personalDetailsModel.getGender()));
         tvAddress.setText(getString(R.string.address_text, personalDetailsModel.getAddress()));

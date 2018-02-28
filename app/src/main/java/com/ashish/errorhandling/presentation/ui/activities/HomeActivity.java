@@ -33,6 +33,10 @@ public class HomeActivity extends AppCompatActivity implements HomePresenter.Vie
     }
 
     private void initComponent() {
+        if(getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(getString(R.string.welcome_title));
+        }
+
         // init welcome message
         tvWelcomeText = findViewById(R.id.tv_welcome_text);
 

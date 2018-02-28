@@ -14,4 +14,5 @@
     <string name="bloodgroup_text">Bloodgroup: %1$s</string>
     <string name="height_text">Height: %1$d</string>
     <string name="weight_text">Weight: %1$f</string>
+    <string name="welcome_title">Welcome</string>
 </resources>

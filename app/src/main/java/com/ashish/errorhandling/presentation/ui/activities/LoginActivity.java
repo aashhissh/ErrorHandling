@@ -34,6 +34,10 @@ public class LoginActivity extends AppCompatActivity implements LoginPresenter.V
     }
 
     private void initComponent() {
+        if(getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(getString(R.string.login));
+        }
+
         // init entry fields
         etUserName = findViewById(R.id.et_username);
         etPassword = findViewById(R.id.et_password);
