@@ -67,10 +67,12 @@ public class LoginActivity extends AppCompatActivity implements LoginPresenter.V
             case R.id.bt_login:
                 if(CodeUtil.isTextEmpty(etUserName.getText().toString())) {
                     showError(getString(R.string.please_enter_username));
+                    return;
                 }
 
                 if(CodeUtil.isTextEmpty(etPassword.getText().toString())) {
                     showError(getString(R.string.please_enter_password));
+                    return;
                 }
 
                 loginPresenter.onLoginClicked(

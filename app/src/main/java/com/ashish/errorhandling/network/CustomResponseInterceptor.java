@@ -32,7 +32,7 @@ public class CustomResponseInterceptor implements Interceptor {
     public Response intercept(Chain chain) throws IOException {
         Request request = chain.request();
         Response response = chain.proceed(request);
-        if (response.code() != 200) {
+        if (response.code() == 401) {
             Response r = null;
             try { r = makeTokenRefreshCall(request, chain); }
             catch (JSONException e) { e.printStackTrace(); }
