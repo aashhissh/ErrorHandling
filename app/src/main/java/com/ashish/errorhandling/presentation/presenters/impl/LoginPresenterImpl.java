@@ -3,6 +3,7 @@ package com.ashish.errorhandling.presentation.presenters.impl;
 import com.ashish.errorhandling.domain.executor.Executor;
 import com.ashish.errorhandling.domain.executor.MainThread;
 import com.ashish.errorhandling.domain.interactors.LoginInteractor;
+import com.ashish.errorhandling.domain.interactors.impl.LoginInteractorImpl;
 import com.ashish.errorhandling.domain.repository.UserRepository;
 import com.ashish.errorhandling.presentation.presenters.LoginPresenter;
 import com.ashish.errorhandling.presentation.presenters.base.AbstractPresenter;
@@ -59,6 +60,14 @@ public class LoginPresenterImpl extends AbstractPresenter implements LoginPresen
     @Override
     public void onLoginClicked(String username, String password) {
         view.showProgress();
-
+        LoginInteractor loginInteractor = new LoginInteractorImpl(
+                mExecutor,
+                mMainThread,
+                this,
+                userRepository,
+                username,
+                password
+        );
+        loginInteractor.execute();
     }
 }
