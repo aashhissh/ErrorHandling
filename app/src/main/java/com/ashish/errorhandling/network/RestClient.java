@@ -1,5 +1,10 @@
 package com.ashish.errorhandling.network;
 
+import com.ashish.errorhandling.network.interceptors.AddCookiesInterceptor;
+import com.ashish.errorhandling.network.interceptors.CustomResponseInterceptor;
+import com.ashish.errorhandling.network.interceptors.ReceivedCookieInterceptor;
+import com.ashish.errorhandling.storage.UserRepositoryImpl;
+
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
@@ -17,10 +22,14 @@ public class RestClient {
     private static Retrofit s_retrofit;
 
     private RestClient() {
-        CustomResponseInterceptor interceptor = new CustomResponseInterceptor();
+        CustomResponseInterceptor responseInterceptor = new CustomResponseInterceptor(new UserRepositoryImpl());
+        AddCookiesInterceptor addCookiesInterceptor = new AddCookiesInterceptor();
+        ReceivedCookieInterceptor receivedCookieInterceptor = new ReceivedCookieInterceptor();
 
         OkHttpClient client = new OkHttpClient.Builder()
-                .addInterceptor(interceptor)
+                .addInterceptor(addCookiesInterceptor)
+                .addInterceptor(responseInterceptor)
+                .addInterceptor(receivedCookieInterceptor)
                 .build();
 
         s_retrofit = new Retrofit.Builder()

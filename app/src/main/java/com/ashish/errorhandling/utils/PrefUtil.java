@@ -5,6 +5,8 @@ import android.content.SharedPreferences;
 
 import com.ashish.errorhandling.AppConstants;
 
+import java.util.HashSet;
+
 /**
  * @author ashish
  * @since 27/02/18
@@ -53,6 +55,14 @@ public final class PrefUtil {
 
     public static void setString(String key, String value) {
         currentInstance().getSharedPrefEditor().putString(key, value).apply();
+    }
+
+    public static void setStringSet(String key, HashSet<String> stringSet) {
+        currentInstance().getSharedPrefEditor().putStringSet(key, stringSet);
+    }
+
+    public static HashSet<String> getStringSet(String key) {
+        return (HashSet<String>) currentInstance().getSharedPref().getStringSet(key, new HashSet<String>());
     }
 
 }
