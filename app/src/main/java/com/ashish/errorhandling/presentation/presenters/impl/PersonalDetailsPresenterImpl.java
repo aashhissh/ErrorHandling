@@ -3,6 +3,7 @@ package com.ashish.errorhandling.presentation.presenters.impl;
 import com.ashish.errorhandling.domain.executor.Executor;
 import com.ashish.errorhandling.domain.executor.MainThread;
 import com.ashish.errorhandling.domain.interactors.PersonalDetailsInteractor;
+import com.ashish.errorhandling.domain.interactors.impl.PersonalDetailsInteractorImpl;
 import com.ashish.errorhandling.domain.model.UserDetailsModel;
 import com.ashish.errorhandling.domain.repository.UserRepository;
 import com.ashish.errorhandling.presentation.converter.UserDetailsToPersonalInfoConverter;
@@ -32,7 +33,14 @@ public class PersonalDetailsPresenterImpl extends AbstractPresenter implements P
     }
 
     private void getUsersPersonalDetails() {
-
+        view.showProgress();
+        PersonalDetailsInteractor personalDetailsInteractor = new PersonalDetailsInteractorImpl(
+                mExecutor,
+                mMainThread,
+                this,
+                userRepository
+        );
+        personalDetailsInteractor.execute();
     }
 
     @Override
