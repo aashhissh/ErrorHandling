@@ -6,6 +6,7 @@ import com.ashish.errorhandling.domain.executor.MainThread;
 import com.ashish.errorhandling.domain.interactors.LastLoginInteractor;
 import com.ashish.errorhandling.domain.interactors.base.AbstractInteractor;
 import com.ashish.errorhandling.domain.repository.UserRepository;
+import com.ashish.errorhandling.network.CustomCallback;
 import com.ashish.errorhandling.network.RestClient;
 import com.ashish.errorhandling.network.payload.GetLastLoginDetailsPayload;
 import com.ashish.errorhandling.network.response.GetLastLoginDetailsResponse;
@@ -59,12 +60,11 @@ public class LastLoginInteractorImpl extends AbstractInteractor implements LastL
             GetLastLoginDetailsPayload getLastLoginDetailsPayload = new GetLastLoginDetailsPayload();
 
             errorHandlingRestService.getLastLoginDetails(getLastLoginDetailsPayload)
-                    .enqueue(new retrofit2.Callback<GetLastLoginDetailsResponse>() {
+                    .enqueue(new CustomCallback<GetLastLoginDetailsResponse>(new CustomCallback.RetrofitCustomCallback<GetLastLoginDetailsResponse>() {
                         @Override
                         public void onResponse(Call<GetLastLoginDetailsResponse> call, Response<GetLastLoginDetailsResponse> response) {
                             final GetLastLoginDetailsResponse getLastLoginDetailsResponse = response.body();
-
-                            if(response.isSuccessful() && getLastLoginDetailsResponse != null &&
+                            if(getLastLoginDetailsResponse != null &&
                                     getLastLoginDetailsResponse.getStatus() == 1) {
                                 userRepository.saveUserId(getLastLoginDetailsResponse.getUserId());
                                 mMainThread.post(new Runnable() {
@@ -77,43 +77,38 @@ public class LastLoginInteractorImpl extends AbstractInteractor implements LastL
                                         );
                                     }
                                 });
-                            } else if(response.code() == 403) {
-                                mMainThread.post(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        userRepository.saveAuthToken(null);
-                                        callback.onTokenRevoked();
-                                    }
-                                });
                             } else {
-                                String message = getLastLoginDetailsResponse != null &&
-                                        getLastLoginDetailsResponse.getMsg() != null ?
+                                String message = getLastLoginDetailsResponse != null ?
                                         getLastLoginDetailsResponse.getMsg() :
                                         "Something went wrong !!!";
-                                onError(message);
+                                onResponseError(message);
                             }
                         }
 
                         @Override
-                        public void onFailure(Call<GetLastLoginDetailsResponse> call, Throwable error) {
-                            String errorMessage;
-                            if (error instanceof IOException) {
-                                // Timeout
-                                errorMessage = String.valueOf(error.getCause());
-                            } else if (error instanceof IllegalStateException) {
-                                // ConversionError
-                                errorMessage = String.valueOf(error.getCause());
-                            } else {
-                                // Other Error
-                                errorMessage = String.valueOf(error.getLocalizedMessage());
-                            }
-                            onError(errorMessage);
+                        public void onFailure(String errorMessage) {
+                            onResponseError(errorMessage);
                         }
-                    });
+
+                        @Override
+                        public void onError(String errorMessage) {
+                            onResponseError(errorMessage);
+                        }
+
+                        @Override
+                        public void onTokenRevoked() {
+                            mMainThread.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    callback.onTokenRevoked();
+                                }
+                            });
+                        }
+                    }));
         }
     }
 
-    private void onError(final String errorMessage) {
+    private void onResponseError(final String errorMessage) {
         mMainThread.post(new Runnable() {
             @Override
             public void run() {
