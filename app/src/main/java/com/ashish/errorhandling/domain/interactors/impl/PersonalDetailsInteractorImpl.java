@@ -1,13 +1,17 @@
 package com.ashish.errorhandling.domain.interactors.impl;
 
+import android.text.TextUtils;
+
 import com.ashish.errorhandling.domain.converters.GetUserDetailsModelConverter;
 import com.ashish.errorhandling.domain.executor.Executor;
 import com.ashish.errorhandling.domain.executor.MainThread;
 import com.ashish.errorhandling.domain.interactors.PersonalDetailsInteractor;
 import com.ashish.errorhandling.domain.interactors.base.AbstractInteractor;
 import com.ashish.errorhandling.domain.repository.UserRepository;
+import com.ashish.errorhandling.network.CustomCallback;
 import com.ashish.errorhandling.network.RestClient;
 import com.ashish.errorhandling.network.payload.GetUserDetailsPayload;
+import com.ashish.errorhandling.network.response.AuthenticateResponse;
 import com.ashish.errorhandling.network.response.GetUserDetailsResponse;
 import com.ashish.errorhandling.network.services.ErrorHandlingRestService;
 
@@ -49,16 +53,14 @@ public class PersonalDetailsInteractorImpl extends AbstractInteractor implements
             ErrorHandlingRestService errorHandlingRestService = RestClient.getService(ErrorHandlingRestService.class);
 
             // initializing payload object for get user details
-            GetUserDetailsPayload getUserDetailsPayload = new GetUserDetailsPayload(userRepository.getUserId());
+            final GetUserDetailsPayload getUserDetailsPayload = new GetUserDetailsPayload(userRepository.getUserId());
 
             errorHandlingRestService.getUserDetails(getUserDetailsPayload)
-                    .enqueue(new retrofit2.Callback<GetUserDetailsResponse>() {
+                    .enqueue(new CustomCallback<GetUserDetailsResponse>(new CustomCallback.RetrofitCustomCallback<GetUserDetailsResponse>() {
                         @Override
                         public void onResponse(Call<GetUserDetailsResponse> call, Response<GetUserDetailsResponse> response) {
                             final GetUserDetailsResponse getUserDetailsResponse = response.body();
-
-                            if(response.isSuccessful() && getUserDetailsResponse != null &&
-                                    getUserDetailsResponse.getStatus() == 1) {
+                            if(getUserDetailsResponse != null && getUserDetailsResponse.getStatus() == 1) {
                                 mMainThread.post(new Runnable() {
                                     @Override
                                     public void run() {
@@ -69,43 +71,39 @@ public class PersonalDetailsInteractorImpl extends AbstractInteractor implements
                                         );
                                     }
                                 });
-                            } else if(response.code() == 403) {
-                                mMainThread.post(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        userRepository.saveAuthToken(null);
-                                        callback.onTokenRevoked();
-                                    }
-                                });
                             } else {
-                                String message = getUserDetailsResponse != null &&
-                                        getUserDetailsResponse.getMsg() != null ?
+                                String message = !TextUtils.isEmpty(getUserDetailsResponse.getMsg()) ?
                                         getUserDetailsResponse.getMsg() :
                                         "Something went wrong !!!";
-                                onError(message);
+                                onResponseError(message);
                             }
                         }
 
                         @Override
-                        public void onFailure(Call<GetUserDetailsResponse> call, Throwable error) {
-                            String errorMessage;
-                            if (error instanceof IOException) {
-                                // Timeout
-                                errorMessage = String.valueOf(error.getCause());
-                            } else if (error instanceof IllegalStateException) {
-                                // ConversionError
-                                errorMessage = String.valueOf(error.getCause());
-                            } else {
-                                // Other Error
-                                errorMessage = String.valueOf(error.getLocalizedMessage());
-                            }
-                            onError(errorMessage);
+                        public void onFailure(String errorMessage) {
+                            onResponseError(errorMessage);
                         }
-                    });
+
+                        @Override
+                        public void onError(String errorMessage) {
+                            onResponseError(errorMessage);
+                        }
+
+                        @Override
+                        public void onTokenRevoked() {
+                            mMainThread.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    userRepository.saveAuthToken(null);
+                                    callback.onTokenRevoked();
+                                }
+                            });
+                        }
+                    }));
         }
     }
 
-    private void onError(final String errorMessage) {
+    private void onResponseError(final String errorMessage) {
         mMainThread.post(new Runnable() {
             @Override
             public void run() {

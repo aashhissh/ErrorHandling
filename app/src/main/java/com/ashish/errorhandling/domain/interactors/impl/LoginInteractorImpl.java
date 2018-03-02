@@ -5,6 +5,7 @@ import com.ashish.errorhandling.domain.executor.MainThread;
 import com.ashish.errorhandling.domain.interactors.LoginInteractor;
 import com.ashish.errorhandling.domain.interactors.base.AbstractInteractor;
 import com.ashish.errorhandling.domain.repository.UserRepository;
+import com.ashish.errorhandling.network.CustomCallback;
 import com.ashish.errorhandling.network.RestClient;
 import com.ashish.errorhandling.network.payload.AuthenticatePayload;
 import com.ashish.errorhandling.network.payload.GetLastLoginDetailsPayload;
@@ -51,48 +52,45 @@ public class LoginInteractorImpl extends AbstractInteractor implements LoginInte
         // initializing payload object for authenticate
         AuthenticatePayload authenticatePayload = new AuthenticatePayload(userName, password);
 
-        errorHandlingRestService.authenticate(authenticatePayload).enqueue(new retrofit2.Callback<AuthenticateResponse>() {
-            @Override
-            public void onResponse(Call<AuthenticateResponse> call, Response<AuthenticateResponse> response) {
-                AuthenticateResponse authenticateResponse = response.body();
-
-                if(response.isSuccessful() && authenticateResponse != null &&
-                        authenticateResponse.getStatus() ==1) {
-                    userRepository.saveAuthToken(authenticateResponse.getAccessToken());
-                    mMainThread.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            callback.onSuccess();
+        errorHandlingRestService.authenticate(authenticatePayload)
+                .enqueue(new CustomCallback<AuthenticateResponse>(new CustomCallback.RetrofitCustomCallback<AuthenticateResponse>() {
+                    @Override
+                    public void onResponse(Call<AuthenticateResponse> call, Response<AuthenticateResponse> response) {
+                        AuthenticateResponse authenticateResponse = response.body();
+                        if(authenticateResponse != null && authenticateResponse.getStatus() == 1) {
+                            userRepository.saveAuthToken(authenticateResponse.getAccessToken());
+                            mMainThread.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    callback.onSuccess();
+                                }
+                            });
+                        } else {
+                            String message = authenticateResponse != null ?
+                                    authenticateResponse.getMsg() :
+                                    "Something went wrong !!!";
+                            onResponseError(message);
                         }
-                    });
-                } else {
-                    String message = authenticateResponse != null &&
-                            authenticateResponse.getMsg() != null ?
-                            authenticateResponse.getMsg() :
-                            "Something went wrong !!!";
-                    onError(message);
-                }
-            }
+                    }
 
-            @Override
-            public void onFailure(Call<AuthenticateResponse> call, Throwable error) {
-                String errorMessage;
-                if (error instanceof IOException) {
-                    // Timeout
-                    errorMessage = String.valueOf(error.getCause());
-                } else if (error instanceof IllegalStateException) {
-                    // ConversionError
-                    errorMessage = String.valueOf(error.getCause());
-                } else {
-                    // Other Error
-                    errorMessage = String.valueOf(error.getLocalizedMessage());
-                }
-                onError(errorMessage);
-            }
-        });
+                    @Override
+                    public void onFailure(String errorMessage) {
+                        onResponseError(errorMessage);
+                    }
+
+                    @Override
+                    public void onError(String errorMessage) {
+                        onResponseError(errorMessage);
+                    }
+
+                    @Override
+                    public void onTokenRevoked() {
+                    }
+                }));
+
     }
 
-    private void onError(final String errorMessage) {
+    private void onResponseError(final String errorMessage) {
         mMainThread.post(new Runnable() {
             @Override
             public void run() {
