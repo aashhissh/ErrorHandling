@@ -11,6 +11,8 @@ import com.ashish.errorhandling.network.payload.GetLastLoginDetailsPayload;
 import com.ashish.errorhandling.network.response.AuthenticateResponse;
 import com.ashish.errorhandling.network.services.ErrorHandlingRestService;
 
+import java.io.IOException;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -73,8 +75,19 @@ public class LoginInteractorImpl extends AbstractInteractor implements LoginInte
             }
 
             @Override
-            public void onFailure(Call<AuthenticateResponse> call, Throwable t) {
-                onError("Something went wrong !!!");
+            public void onFailure(Call<AuthenticateResponse> call, Throwable error) {
+                String errorMessage;
+                if (error instanceof IOException) {
+                    // Timeout
+                    errorMessage = String.valueOf(error.getCause());
+                } else if (error instanceof IllegalStateException) {
+                    // ConversionError
+                    errorMessage = String.valueOf(error.getCause());
+                } else {
+                    // Other Error
+                    errorMessage = String.valueOf(error.getLocalizedMessage());
+                }
+                onError(errorMessage);
             }
         });
     }

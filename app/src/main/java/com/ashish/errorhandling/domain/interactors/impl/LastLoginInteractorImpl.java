@@ -7,11 +7,11 @@ import com.ashish.errorhandling.domain.interactors.LastLoginInteractor;
 import com.ashish.errorhandling.domain.interactors.base.AbstractInteractor;
 import com.ashish.errorhandling.domain.repository.UserRepository;
 import com.ashish.errorhandling.network.RestClient;
-import com.ashish.errorhandling.network.RestHeaderService;
 import com.ashish.errorhandling.network.payload.GetLastLoginDetailsPayload;
 import com.ashish.errorhandling.network.response.GetLastLoginDetailsResponse;
 import com.ashish.errorhandling.network.services.ErrorHandlingRestService;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -58,9 +58,7 @@ public class LastLoginInteractorImpl extends AbstractInteractor implements LastL
             // initializing payload object for get user details
             GetLastLoginDetailsPayload getLastLoginDetailsPayload = new GetLastLoginDetailsPayload();
 
-            Map<String, String> header = RestHeaderService.getRequestHeader(token);
-
-            errorHandlingRestService.getLastLoginDetails(header, getLastLoginDetailsPayload)
+            errorHandlingRestService.getLastLoginDetails(getLastLoginDetailsPayload)
                     .enqueue(new retrofit2.Callback<GetLastLoginDetailsResponse>() {
                         @Override
                         public void onResponse(Call<GetLastLoginDetailsResponse> call, Response<GetLastLoginDetailsResponse> response) {
@@ -79,6 +77,14 @@ public class LastLoginInteractorImpl extends AbstractInteractor implements LastL
                                         );
                                     }
                                 });
+                            } else if(response.code() == 403) {
+                                mMainThread.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        userRepository.saveAuthToken(null);
+                                        callback.onTokenRevoked();
+                                    }
+                                });
                             } else {
                                 String message = getLastLoginDetailsResponse != null &&
                                         getLastLoginDetailsResponse.getMsg() != null ?
@@ -89,8 +95,19 @@ public class LastLoginInteractorImpl extends AbstractInteractor implements LastL
                         }
 
                         @Override
-                        public void onFailure(Call<GetLastLoginDetailsResponse> call, Throwable t) {
-                            onError("Something went wrong !!!");
+                        public void onFailure(Call<GetLastLoginDetailsResponse> call, Throwable error) {
+                            String errorMessage;
+                            if (error instanceof IOException) {
+                                // Timeout
+                                errorMessage = String.valueOf(error.getCause());
+                            } else if (error instanceof IllegalStateException) {
+                                // ConversionError
+                                errorMessage = String.valueOf(error.getCause());
+                            } else {
+                                // Other Error
+                                errorMessage = String.valueOf(error.getLocalizedMessage());
+                            }
+                            onError(errorMessage);
                         }
                     });
         }

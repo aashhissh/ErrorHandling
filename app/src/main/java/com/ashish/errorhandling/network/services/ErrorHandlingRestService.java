@@ -30,13 +30,11 @@ public interface ErrorHandlingRestService {
 
     @POST("get_last_login_ details/")
     Call<GetLastLoginDetailsResponse> getLastLoginDetails(
-            @HeaderMap Map<String, String> headers,
             @Body GetLastLoginDetailsPayload getLastLoginDetailsPayload
     );
 
     @POST("user/get/")
     Call<GetUserDetailsResponse> getUserDetails(
-            @HeaderMap Map<String, String> headers,
             @Body GetUserDetailsPayload getUserDetailsPayload
     );
 
